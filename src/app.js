@@ -14,7 +14,7 @@ router.get("/", async (ctx, next) => {
 })
 
 router.get("/async", async (ctx, next) =>
-  new Promise(resolve =>
+  await new Promise(resolve =>
     setTimeout(() => {
       ctx.body = {
         method: "GET",
@@ -26,7 +26,7 @@ router.get("/async", async (ctx, next) =>
 )
 
 router.get("/error-async", async (ctx, next) =>
-  new Promise((resolve, reject) =>
+  await new Promise((resolve, reject) =>
     setTimeout(() => {
       reject(new Error("Hoge Fuga"))
     }, 50)
