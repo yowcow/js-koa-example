@@ -1,63 +1,28 @@
-import Promise       from "bluebird"
 import Koa           from "koa"
 import koaBodyParser from "koa-bodyparser"
-import koaRouter     from "koa-router"
 import koaStatic     from "koa-static"
 import path          from "path"
 
-const router = koaRouter()
-
-router.get("/", async (ctx, next) => {
-  const req = ctx.request
-  ctx.body = {
-    method:  req.method,
-    path:    req.path,
-    message: "hoge"
-  }
-})
-
-router.post("/form", async (ctx, next) => {
-  const req = ctx.request
-  ctx.body = {
-    method: req.method,
-    path:   req.path,
-    query:  req.query
-  }
-})
-
-router.post("/data.json", async (ctx, next) => {
-  const req = ctx.request
-  ctx.body = {
-    method: req.method,
-    path:   req.path,
-    json:   req.body
-  }
-})
-
-router.get("/async", async (ctx, next) =>
-  await new Promise(resolve =>
-    setTimeout(() => {
-      ctx.body = {
-        method:  "GET",
-        path:    "/async",
-        message: "fuga"
-      }
-      resolve()
-    }, 50)
-  )
-)
-
-router.get("/error-async", async (ctx, next) =>
-  await new Promise((resolve, reject) =>
-    setTimeout(() => {
-      reject(new Error("Hoge Fuga"))
-    }, 50)
-  )
-)
+import routing from "./app/routing"
 
 const app = new Koa()
 
+/** Static File Serving **/
 app.use(koaStatic(path.join(__dirname, "..", "public")))
+
+/** Error Handling **/
+app.use(async (ctx, next) => {
+  try {
+    await next()
+  }
+  catch (err) {
+    ctx.status = err.status || 500
+    ctx.body   = "Something wrong!"
+    ctx.app.emit('error', err, ctx)
+  }
+})
+
+/** Response Time Logging **/
 app.use(async (ctx, next) => {
   const req   = ctx.request
   const start = new Date();
@@ -70,18 +35,17 @@ app.use(async (ctx, next) => {
 
   console.log(`-- Dispatched  ${req.method} ${req.url} in ${ms} ms`)
 })
+
+/** Request Parsing  **/
 app.use(koaBodyParser({
   enableType: ["json", "form"],
   detectJSON(ctx) {
     return /\.json$/i.test(ctx.path)
   }
 }))
-app.use(router.routes())
-app.use(router.allowedMethods())
 
-app.on("error", (err, ctx) => {
-  console.error(`Got error as ${err}`)
-  ctx.response.body = "Something wrong!"
-})
+/** Routing **/
+app.use(routing.routes())
+app.use(routing.allowedMethods())
 
 export default app
