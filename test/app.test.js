@@ -21,8 +21,39 @@ describe("GET /", () => {
     .expect(200)
     .expect("Content-Type", /application\/json/)
     .expect(res => expect(res.body).toEqual({
-      method: "GET",
-      path:   "/"
+      method:  "GET",
+      path:    "/",
+      message: "hoge"
+    }))
+    .end(done)
+  })
+})
+
+describe("POST /form", () => {
+  it("should return a query as a JSON", done => {
+    request(app)
+    .post("/form")
+    .query({ foo: "bar" })
+    .expect("Content-Type", /application\/json/)
+    .expect(res => expect(res.body).toEqual({
+      method: "POST",
+      path:   "/form",
+      query:  { foo: "bar" }
+    }))
+    .end(done)
+  })
+})
+
+describe("POST /data.json", () => {
+  it("should return accepted JSON in a JSON", done => {
+    request(app)
+    .post("/data.json")
+    .send({ foo: "bar" })
+    .expect("Content-Type", /application\/json/)
+    .expect(res => expect(res.body).toEqual({
+      method: "POST",
+      path:   "/data.json",
+      json:   { foo: "bar" }
     }))
     .end(done)
   })
@@ -35,8 +66,9 @@ describe("GET /async", () => {
     .expect(200)
     .expect("Content-Type", /application\/json/)
     .expect(res => expect(res.body).toEqual({
-      method: "GET",
-      path:   "/async"
+      method:  "GET",
+      path:    "/async",
+      message: "fuga"
     }))
     .end(done)
   })
