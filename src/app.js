@@ -7,6 +7,9 @@ import routing from "./app/routing"
 
 const app = new Koa()
 
+/** Let app hold something in common **/
+app.myStash = "hogehoge"
+
 /** Static File Serving **/
 app.use(koaStatic(path.join(__dirname, "..", "public")))
 

@@ -51,4 +51,10 @@ router.get("/error-async", async (ctx, next) =>
   )
 )
 
+router.get("/my-stash", async (ctx, next) => {
+  ctx.body = {
+    stash: ctx.app.myStash
+  }
+})
+
 export default router

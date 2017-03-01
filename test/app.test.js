@@ -84,3 +84,16 @@ describe("GET /error-async", () => {
     .end(done)
   })
 })
+
+describe("GET /my-stash", () => {
+  it("should return app.myStash", done => {
+    request(app.callback())
+    .get("/my-stash")
+    .expect(200)
+    .expect("Content-Type", /application\/json/)
+    .expect(res => expect(res.body).toEqual({
+      stash: "hogehoge"
+    }))
+    .end(done)
+  })
+})
