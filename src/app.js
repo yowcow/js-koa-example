@@ -1,3 +1,5 @@
+/* eslint no-console: ["off"] */
+
 import Koa           from "koa"
 import koaBodyParser from "koa-bodyparser"
 import koaConvert    from "koa-convert"
@@ -27,14 +29,14 @@ app.use(async (ctx, next) => {
   catch (err) {
     ctx.status = err.status || 500
     ctx.body   = "Something wrong!"
-    ctx.app.emit('error', err, ctx)
+    ctx.app.emit("error", err, ctx)
   }
 })
 
 /** Response Time Logging **/
 app.use(async (ctx, next) => {
   const req   = ctx.request
-  const start = new Date();
+  const start = new Date()
 
   console.log(`-- Dispatching ${ctx.method} ${ctx.url}`)
 

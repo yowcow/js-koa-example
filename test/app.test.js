@@ -1,3 +1,5 @@
+/* eslint-env node, mocha */
+
 import expect  from "expect"
 import request from "supertest"
 

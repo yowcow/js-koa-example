@@ -3,7 +3,7 @@ import koaRouter from "koa-router"
 
 const router = koaRouter()
 
-router.get("/", async (ctx, next) => {
+router.get("/", async (ctx) => {
   const req = ctx.request
   ctx.body = {
     method:  req.method,
@@ -12,7 +12,7 @@ router.get("/", async (ctx, next) => {
   }
 })
 
-router.post("/form", async (ctx, next) => {
+router.post("/form", async (ctx) => {
   const req = ctx.request
   ctx.body = {
     method: req.method,
@@ -21,7 +21,7 @@ router.post("/form", async (ctx, next) => {
   }
 })
 
-router.post("/data.json", async (ctx, next) => {
+router.post("/data.json", async (ctx) => {
   const req = ctx.request
   ctx.body = {
     method: req.method,
@@ -30,7 +30,7 @@ router.post("/data.json", async (ctx, next) => {
   }
 })
 
-router.get("/async", async (ctx, next) =>
+router.get("/async", async (ctx) =>
   await new Promise(resolve =>
     setTimeout(() => {
       ctx.body = {
@@ -43,7 +43,7 @@ router.get("/async", async (ctx, next) =>
   )
 )
 
-router.get("/error-async", async (ctx, next) =>
+router.get("/error-async", async () =>
   await new Promise((resolve, reject) =>
     setTimeout(() => {
       reject(new Error("Hoge Fuga"))
@@ -51,13 +51,13 @@ router.get("/error-async", async (ctx, next) =>
   )
 )
 
-router.get("/my-stash", async (ctx, next) => {
+router.get("/my-stash", async (ctx) => {
   ctx.body = {
     stash: ctx.app.myStash
   }
 })
 
-router.get("/count-up", async (ctx, next) => {
+router.get("/count-up", async (ctx) => {
   if (ctx.session.count === undefined) {
     ctx.session.count = 1
   }
