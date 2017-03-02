@@ -1,5 +1,7 @@
 import Koa           from "koa"
 import koaBodyParser from "koa-bodyparser"
+import koaConvert    from "koa-convert"
+import koaSession    from "koa-session"
 import koaStatic     from "koa-static"
 import path          from "path"
 
@@ -12,6 +14,10 @@ app.myStash = "hogehoge"
 
 /** Static File Serving **/
 app.use(koaStatic(path.join(__dirname, "..", "public")))
+
+/** Session **/
+app.keys = ["hoge-fuga"]
+app.use(koaConvert(koaSession({ key: "test-app" }, app)))
 
 /** Error Handling **/
 app.use(async (ctx, next) => {

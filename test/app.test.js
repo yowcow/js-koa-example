@@ -97,3 +97,32 @@ describe("GET /my-stash", () => {
     .end(done)
   })
 })
+
+describe("GET /count-up", () => {
+  let cookies = []
+
+  it("should return count 1", done => {
+    request(app.callback())
+    .get("/count-up")
+    .expect(200)
+    .expect(res => expect(res.body).toEqual({ count: 1 }))
+    .expect(res => {
+      cookies = res.headers["set-cookie"]
+        .map(cookie => cookie.split(";")[0])
+        .join(";")
+    })
+    .end(done)
+  })
+
+  it("should return count 2", done => {
+    const req = request(app.callback())
+    .get("/count-up")
+
+    req.cookies = cookies // Set cookie header
+
+    req.send()
+    .expect(200)
+    .expect(res => expect(res.body).toEqual({ count: 2 }))
+    .end(done)
+  })
+})

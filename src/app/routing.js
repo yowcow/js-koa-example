@@ -57,4 +57,16 @@ router.get("/my-stash", async (ctx, next) => {
   }
 })
 
+router.get("/count-up", async (ctx, next) => {
+  if (ctx.session.count === undefined) {
+    ctx.session.count = 1
+  }
+  else {
+    ctx.session.count += 1
+  }
+  ctx.body = {
+    count: ctx.session.count
+  }
+})
+
 export default router
