@@ -1,5 +1,6 @@
 /* eslint no-console: ["off"] */
 
+import Promise       from "bluebird"
 import Koa           from "koa"
 import koaBodyParser from "koa-bodyparser"
 import koaConvert    from "koa-convert"
@@ -9,54 +10,60 @@ import path          from "path"
 
 import routing from "./app/routing"
 
-const app = new Koa()
+const createApp = async () => {
+  const app = new Koa()
 
-/** Let app hold something in common **/
-app.myStash = "hogehoge"
+  /** Load something to app in async **/
+  app.myStash = await new Promise(resolve =>
+    setTimeout(() => resolve("hogehoge"), 10)
+  )
 
-/** Static File Serving **/
-app.use(koaStatic(path.join(__dirname, "..", "public")))
+  /** Static File Serving **/
+  app.use(koaStatic(path.join(__dirname, "..", "public")))
 
-/** Session **/
-app.keys = ["hoge-fuga"]
-app.use(koaConvert(koaSession({ key: "test-app" }, app)))
+  /** Session **/
+  app.keys = ["hoge-fuga"]
+  app.use(koaConvert(koaSession({ key: "test-app" }, app)))
 
-/** Error Handling **/
-app.use(async (ctx, next) => {
-  try {
+  /** Error Handling **/
+  app.use(async (ctx, next) => {
+    try {
+      await next()
+    }
+    catch (err) {
+      ctx.status = err.status || 500
+      ctx.body   = "Something wrong!"
+      ctx.app.emit("error", err, ctx)
+    }
+  })
+
+  /** Response Time Logging **/
+  app.use(async (ctx, next) => {
+    const req   = ctx.request
+    const start = new Date()
+
+    console.log(`-- Dispatching ${ctx.method} ${ctx.url}`)
+
     await next()
-  }
-  catch (err) {
-    ctx.status = err.status || 500
-    ctx.body   = "Something wrong!"
-    ctx.app.emit("error", err, ctx)
-  }
-})
 
-/** Response Time Logging **/
-app.use(async (ctx, next) => {
-  const req   = ctx.request
-  const start = new Date()
+    const ms = new Date() - start
 
-  console.log(`-- Dispatching ${ctx.method} ${ctx.url}`)
+    console.log(`-- Dispatched  ${req.method} ${req.url} in ${ms} ms`)
+  })
 
-  await next()
+  /** Request Parsing  **/
+  app.use(koaBodyParser({
+    enableType: ["json", "form"],
+    detectJSON(ctx) {
+      return /\.json$/i.test(ctx.path)
+    }
+  }))
 
-  const ms = new Date() - start
+  /** Routing **/
+  app.use(routing.routes())
+  app.use(routing.allowedMethods())
 
-  console.log(`-- Dispatched  ${req.method} ${req.url} in ${ms} ms`)
-})
+  return app
+}
 
-/** Request Parsing  **/
-app.use(koaBodyParser({
-  enableType: ["json", "form"],
-  detectJSON(ctx) {
-    return /\.json$/i.test(ctx.path)
-  }
-}))
-
-/** Routing **/
-app.use(routing.routes())
-app.use(routing.allowedMethods())
-
-export default app
+export default createApp
